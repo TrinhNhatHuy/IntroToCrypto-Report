@@ -7,13 +7,10 @@
 \usepackage{float}
 \geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
 \usepackage{multirow}
-% import more libraries
-\usepackage{float}
 \usepackage{tabularx}
 \usepackage{array}
 \usepackage{booktabs}
 \usepackage{placeins}
-\usepackage{graphicx}
 
 \usepackage{tikz}
 \usetikzlibrary{calc} 
@@ -31,22 +28,22 @@
 
 % --- ONLY section updates the header ---
 \renewcommand{\sectionmark}[1]{%
-	\markright{\thesection\ #1}
+    \markright{\thesection\ #1}
 }
 
 % --- disable subsection from touching the header ---
 \renewcommand{\subsectionmark}[1]{}
 
 % --- header layout ---
-\fancyhead[L]{GROUP 37}
+\fancyhead[L]{GROUP 1} 
 \fancyhead[R]{\rightmark}
 \makeatletter
 \renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\quad}
 \makeatother
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt}
-\usepackage{booktabs}
 \usepackage{adjustbox}
+
 \begin{document}
 
 % ======================= COVER PAGE ==========================
@@ -79,10 +76,50 @@
   Hoang Quang Minh - 23BI14281}\\
   Le Huy Hoang - 23BI14172\\[1cm]
 
-
-
   {\large Hanoi, \today}
 
 \end{center}
+
+% ======================= FRONTMATTER ==========================
+\newpage
+\pagenumbering{roman} % Dùng số La Mã cho các trang râu ria
+\tableofcontents
+
+\newpage
+\listoffigures % Danh mục hình ảnh (Table of Figures)
+
+% Nếu có bảng biểu, bạn có thể uncomment dòng dưới:
+% \listoftables
+
+% ======================= MAIN CONTENT ==========================
+\newpage
+\pagenumbering{arabic} % Bắt đầu đếm trang 1, 2, 3... cho phần nội dung chính
+\setcounter{page}{1}
+
+% Gọi các file con từ thư mục sections/
+\input{sections/Introductions.tex}
+
+% ======================= BACKMATTER ==========================
+\newpage
+\addcontentsline{toc}{section}{References} % Thêm References vào Mục lục
+\begin{thebibliography}{9}
+
+% Các bạn sẽ thêm tài liệu tham khảo vào đây sau
+\bibitem{rsa_original} 
+Rivest, R. L., Shamir, A., \& Adleman, L. (1978). 
+\textit{A method for obtaining digital signatures and public-key cryptosystems}. 
+Communications of the ACM, 21(2), 120-126.
+
+\bibitem{python_hashlib}
+Python Software Foundation. 
+\textit{hashlib — Secure hashes and message digests}. 
+\url{https://docs.python.org/3/library/hashlib.html}
+
+\end{thebibliography}
+
+\newpage
+\appendix
+\section{Annex: Full Python Source Code}
+% Các bạn có thể nhét toàn bộ source code vào phần phụ lục này để không tính vào 5 trang nội dung chính.
 
 \end{document}
