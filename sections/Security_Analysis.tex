@@ -2,7 +2,7 @@
 
 \subsection{Why RSA Digital Signatures Are Secure}
 
-The security of RSA rests on the \textbf{Integer Factorization Problem}: given a large composite number $n = p \times q$, it is computationally infeasible to recover $p$ and $q$. Without knowing $p$ and $q$, an attacker cannot compute $\phi(n)$, and therefore cannot derive the private exponent $d$ from the public exponent $e$.
+The security of RSA rests on the Integer Factorization Problem: given a large composite number $n = p \times q$, it is computationally infeasible to recover $p$ and $q$. Without knowing $p$ and $q$, an attacker cannot compute $\phi(n)$, and therefore cannot derive the private exponent $d$ from the public exponent $e$.
 
 For our demonstration with small primes (e.g., $p = 104729$, $q = 224737$), the key size is approximately 34 bits—trivially factorable. In practice, RSA keys of 2048 bits or larger are used, where factorization would require billions of years with current technology.
 
