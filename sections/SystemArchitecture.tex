@@ -1,0 +1,71 @@
+\section{System Architecture and Overall Pipeline}
+
+This section describes how all components of the implementation connect together as a complete system. While Section 2 focused on the mathematical theory behind each operation, this section focuses on the software structure — how functions are organized, how data flows between them, and how the system behaves end-to-end from user input to final verification result.
+
+\subsection{Component Overview}
+
+The implementation is organized into three distinct layers, each responsible for a separate concern. These layers are designed so that lower layers have no knowledge of higher layers, keeping the code modular and easy to reason about.
+
+\textbf{Layer 1 — Mathematical Utilities.} This layer contains the pure number-theory functions that the rest of the system depends on. None of these functions perform any I/O or know anything about RSA specifically — they are general-purpose tools.
+
+\begin{itemize}
+  \item \texttt{gcd(a, b)} — Euclidean algorithm, used to check that $\gcd(e,\,\phi(n)) = 1$ before accepting $e$ as the public exponent.
+  \item \texttt{extended\_gcd(a, b)} — returns $(g, x, y)$ satisfying $ax + by = \gcd(a, b)$, used internally by \texttt{modinv}.
+  \item \texttt{modinv(a, m)} — computes $d = e^{-1} \bmod \phi(n)$, the private exponent. Raises an error if the inverse does not exist.
+  \item \texttt{is\_prime(n, k=10)} — Miller-Rabin probabilistic primality test with $k$ rounds. Used to validate user-supplied primes before key generation proceeds.
+\end{itemize}
+
+\textbf{Layer 2 — RSA Core.} This layer builds directly on Layer 1 to implement the three fundamental RSA operations: key generation, signing, and verification.
+
+\begin{itemize}
+  \item \texttt{generate\_keypair(p, q)} — accepts two validated primes and returns \texttt{(public\_key, private\_key)} where each key is a tuple \texttt{(exponent, n)}.
+  \item \texttt{hash\_with\_all(message)} — hashes the input message using all four algorithms (MD5, SHA-1, SHA-256, SHA-512) and returns a dictionary mapping each algorithm name to a \texttt{(hex\_string, integer)} pair. The integer form is required for RSA modular arithmetic.
+  \item \texttt{sign\_all(message, private\_key, hashes)} — for each algorithm, computes \texttt{sig = pow(h \% n, d, n)} and returns a dictionary of four signatures.
+  \item \texttt{verify\_all(message, signatures, public\_key, hashes)} — for each algorithm, computes \texttt{recovered = pow(sig, e, n)} and compares it to the freshly recomputed hash. Returns a dictionary of boolean results.
+\end{itemize}
+
+\textbf{Layer 3 — Application.} The \texttt{main()} function orchestrates the entire flow. It handles all user input with validation loops, calls the Layer 2 functions in sequence, formats and prints results, and runs the tampering simulation. It has no mathematical logic of its own.
+
+\subsection{Overall Pipeline}
+
+The system executes in a fixed sequence of five steps each time it runs. The diagram below illustrates this pipeline from user input through to the final tampering detection result.
+
+\begin{figure}[H]
+  \centering
+  % INSERT OVERALL PIPELINE DIAGRAM HERE
+  \caption{End-to-end pipeline of the RSA Digital Signature system.}
+  \label{fig:pipeline}
+\end{figure}
+
+\begin{enumerate}
+  \item \textbf{Input and Validation.} The user provides two prime numbers $p$ and $q$ and a plaintext message. Each prime is tested with Miller-Rabin before the program continues. If a non-prime is entered, the user is prompted again.
+
+  \item \textbf{Hash Comparison.} The message is immediately hashed with all four algorithms. This step serves two purposes: it produces the hash values that will be used for signing, and it demonstrates side-by-side why MD5 and SHA-1 are considered broken while SHA-256 and SHA-512 remain secure.
+
+  \item \textbf{Key Generation.} \texttt{generate\_keypair(p, q)} computes $n$, $\phi(n)$, $e$, and $d$ as described in Section 2. The public key $(e, n)$ and private key $(d, n)$ are returned and used in subsequent steps.
+
+  \item \textbf{Signing.} \texttt{sign\_all()} applies the private key to produce four independent signatures — one per hash algorithm. Each signature is the integer $S = H^d \bmod n$ where $H$ is the reduced hash integer.
+
+  \item \textbf{Verification and Tampering Test.} \texttt{verify\_all()} is called twice: once on the original message (expected result: all four VALID) and once on a tampered version of the message with the same signatures reused (expected result: all four CAUGHT). This directly demonstrates both data integrity and resistance to substitution attacks.
+\end{enumerate}
+
+\subsection{Sign and Verify Data Flow}
+
+The diagram below shows the internal data flow for the two core operations in detail, making explicit which key is used at each stage and where the comparison that determines validity takes place.
+
+\begin{figure}[H]
+  \centering
+  % INSERT SIGN VS VERIFY DATA FLOW DIAGRAM HERE
+  \caption{Detailed data flow for signing (private key) and verification (public key).}
+  \label{fig:signverify}
+\end{figure}
+
+During \textbf{signing}, the signer hashes the message, reduces the hash integer modulo $n$ to ensure it fits within the RSA modulus, then applies the private exponent: $S = H^d \bmod n$. The resulting integer $S$ is the digital signature.
+
+During \textbf{verification}, the verifier independently re-hashes the received message to obtain $H$, then applies the public exponent to the received signature: $H' = S^e \bmod n$. By Euler's theorem, since $ed \equiv 1 \pmod{\phi(n)}$, the operation recovers the original hash exactly if the message is unmodified. The final check $H' = H$ determines the outcome. If the message was altered in any way, the freshly computed $H$ will differ from $H'$, and verification fails.
+
+\subsection{Tampering Attack Simulation}
+
+To demonstrate data integrity concretely, the system appends the string \texttt{[MODIFIED]} to the original message and passes the modified message together with the original signatures through \texttt{verify\_all()}. Because the hash of the tampered message is completely different from the hash of the original — a consequence of the avalanche effect — the recovered value $H'$ will not match $H$ for any of the four algorithms. All four signatures are marked as CAUGHT, confirming that the system correctly rejects the tampered message regardless of which hash algorithm is used.
+
+This simulation reflects a realistic attack scenario where an adversary intercepts a signed message, modifies its content, and attempts to pass off the original signature as valid. The result shows that RSA digital signatures make such an attack detectable with certainty.
