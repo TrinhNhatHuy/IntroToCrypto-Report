@@ -1,0 +1,62 @@
+\section{Implementation}
+
+The system is implemented as a single Python script (\texttt{main.py}, 195 lines) using only standard libraries: \texttt{random} and \texttt{hashlib}. No external cryptographic packages are used—all mathematical operations are implemented from scratch.
+
+\subsection{Core Functions}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Function} & \textbf{Purpose} \\
+\hline
+\texttt{gcd(a, b)} & Euclidean algorithm for greatest common divisor \\
+\hline
+\texttt{extended\_gcd(a, b)} & Extended Euclidean algorithm, returns $(g, x, y)$ \\
+\hline
+\texttt{modinv(a, m)} & Modular inverse $a^{-1} \bmod m$ via extended GCD \\
+\hline
+\texttt{is\_prime(n, k)} & Miller-Rabin primality test with $k$ rounds \\
+\hline
+\texttt{generate\_keypair(p, q)} & Computes $(e, n)$ and $(d, n)$ from primes $p, q$ \\
+\hline
+\texttt{hash\_with\_all(msg)} & Hashes message with MD5, SHA-1, SHA-256, SHA-512 \\
+\hline
+\texttt{sign\_all(msg, priv, hashes)} & Signs hash values: $S = H^d \bmod n$ \\
+\hline
+\texttt{verify\_all(msg, sigs, pub, hashes)} & Verifies: checks $S^e \bmod n \stackrel{?}{=} H$ \\
+\hline
+\end{tabularx}
+\caption{Summary of implemented functions.}
+\label{tab:functions}
+\end{table}
+
+\subsection{Execution Flow}
+
+The program runs interactively through five steps:
+
+\begin{enumerate}
+    \item \textbf{Input:} User provides two distinct primes $p$, $q$ and a message string.
+    \item \textbf{Hash Comparison:} The message is hashed with all four algorithms. Output displays the digest length (128–512 bits) and security rating of each.
+    \item \textbf{Key Generation:} Computes $n$, $\phi(n)$, selects $e = 65537$, and derives $d$. Displays both keys and the verification $(e \times d) \bmod \phi(n) = 1$.
+    \item \textbf{Signing:} Generates four signatures (one per hash algorithm) using $S = H^d \bmod n$.
+    \item \textbf{Verification \& Tampering:} First verifies the original message (all algorithms return VALID). Then appends text to simulate tampering—all algorithms detect the modification (CAUGHT).
+\end{enumerate}
+
+\subsection{Output Screenshots}
+% ── Chụp screenshots khi chạy chương trình rồi thêm vào đây ──
+% Ví dụ:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.85\textwidth]{images/output_step1.png}
+%   \caption{Program output: Hash comparison and key generation.}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.85\textwidth]{images/output_step2.png}
+%   \caption{Program output: Signing, verification, and tampering detection.}
+% \end{figure}
+
+\textit{(Screenshots of the program output will be inserted here after running \texttt{main.py}.)}

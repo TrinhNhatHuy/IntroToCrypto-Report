@@ -85,11 +85,7 @@
 \pagenumbering{roman} % Dùng số La Mã cho các trang râu ria
 \tableofcontents
 
-\newpage
-\listoffigures % Danh mục hình ảnh (Table of Figures)
-
-% Nếu có bảng biểu, bạn có thể uncomment dòng dưới:
-% \listoftables
+% List of figures removed to save space (only 2 figures)
 
 % ======================= MAIN CONTENT ==========================
 \newpage
@@ -99,22 +95,39 @@
 % Gọi các file con từ thư mục sections/
 \input{sections/Introductions.tex}
 \input{sections/Math_foundations.tex}
+\input{sections/System_Architecture.tex}
+\input{sections/Implementation.tex}
+\input{sections/Security_Analysis.tex}
+\input{sections/Performance_Conclusion.tex}
 
 % ======================= BACKMATTER ==========================
 \newpage
 \addcontentsline{toc}{section}{References} % Thêm References vào Mục lục
 \begin{thebibliography}{9}
 
-% Các bạn sẽ thêm tài liệu tham khảo vào đây sau
 \bibitem{rsa_original} 
 Rivest, R. L., Shamir, A., \& Adleman, L. (1978). 
 \textit{A method for obtaining digital signatures and public-key cryptosystems}. 
-Communications of the ACM, 21(2), 120-126.
+Communications of the ACM, 21(2), 120--126.
 
 \bibitem{python_hashlib}
 Python Software Foundation. 
 \textit{hashlib — Secure hashes and message digests}. 
 \url{https://docs.python.org/3/library/hashlib.html}
+
+\bibitem{miller_rabin}
+Rabin, M. O. (1980). 
+\textit{Probabilistic algorithm for testing primality}. 
+Journal of Number Theory, 12(1), 128--138.
+
+\bibitem{nist_fips}
+NIST (2015). \textit{FIPS 186-4: Digital Signature Standard}. 
+\url{https://doi.org/10.6028/NIST.FIPS.186-4}
+
+\bibitem{sha1_collision}
+Stevens, M. et al. (2017). 
+\textit{The first collision for full SHA-1}. 
+\url{https://shattered.io/}
 
 \end{thebibliography}
 
