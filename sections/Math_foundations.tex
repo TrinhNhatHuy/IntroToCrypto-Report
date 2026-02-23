@@ -1,46 +1,28 @@
-\section{Mathematical Foundation of the RSA Algorithm}
+\section{Mathematical Foundation}
 
-The security and functionality of the RSA algorithm heavily rely on number theory, specifically the practical difficulty of integer factorization and the properties of modular arithmetic. Based on the provided Python implementation, the mathematical foundation is divided into two distinct phases: the key generation process and the core principle of modular exponentiation for signing and verification.
+\subsection{Key Generation}
+The RSA key pair consists of a public key $(e, n)$ and a private key $(d, n)$, generated as follows:
 
-\subsection{Key Generation Process}
-The generation of an RSA key pair establishes a public key $(e, n)$ for signature verification and a private key $(d, n)$ for signature generation. The \texttt{generate\_keypair(p, q)} function orchestrates this process through the following rigorous mathematical steps:
+\textbf{Step 1.} Select two distinct large primes $p$ and $q$, verified using the Miller-Rabin primality test.
 
-\textbf{Step 1: Prime Number Selection and Validation}\\
-The algorithm requires two distinct, large prime numbers, $p$ and $q$. To ensure these numbers are genuinely prime, the implementation utilizes the \textbf{Miller-Rabin primality test} (\texttt{is\_prime(n, k=10)}). Unlike naive trial division, Miller-Rabin is a highly efficient probabilistic algorithm capable of testing extremely large integers. It relies on the property that for a prime $n$ and an odd $d$ where $n-1 = 2^r \cdot d$, either $a^d \equiv 1 \pmod n$ or $a^{2^j \cdot d} \equiv -1 \pmod n$ for some $0 \le j < r$.
-$$ p \neq q \quad \text{and} \quad p, q \in \mathbb{P} $$
+\textbf{Step 2.} Compute the modulus: $n = p \times q$.
 
-\textbf{Step 2: Computing the Modulus ($n$)}\\
-The cryptographic modulus $n$ is calculated as the product of the two primes:
-$$ n = p \times q $$
-This value $n$ forms the mathematical limit (modulo) for all subsequent encryption and decryption operations. Its bit-length directly defines the "key size" of the RSA system.
+\textbf{Step 3.} Compute Euler's totient: $\phi(n) = (p-1)(q-1)$.
 
-\textbf{Step 3: Computing Euler's Totient Function ($\phi(n)$)}\\
-Euler's Totient function, denoted as $\phi(n)$, determines the number of integers up to $n$ that are relatively prime to $n$. For the product of two primes, it is computed as:
-$$ \phi(n) = (p - 1) \times (q - 1) $$
-This value is highly sensitive; it is kept secret and is only used to compute the key exponents.
+\textbf{Step 4.} Choose public exponent $e$ such that $1 < e < \phi(n)$ and $\gcd(e, \phi(n)) = 1$. The standard choice is $e = 65537$.
 
-\textbf{Step 4: Choosing the Public Exponent ($e$)}\\
-An integer $e$ must be chosen such that $1 < e < \phi(n)$ and it is coprime to $\phi(n)$, meaning $\gcd(e, \phi(n)) = 1$. 
-In this implementation, $e$ is initialized to \textbf{65537} ($2^{16} + 1$), which is the Fermat prime $F_4$. This is a widespread industry standard because its binary representation contains only two `1` bits, making signature verification highly efficient while maintaining robust security. If $\gcd(65537, \phi(n)) \neq 1$, the code falls back to iteratively testing odd numbers starting from 3 until the coprime condition is met using the \texttt{gcd(a, b)} function.
-
-\textbf{Step 5: Computing the Private Exponent ($d$)}\\
-The private key exponent $d$ is the modular multiplicative inverse of $e$ modulo $\phi(n)$:
+\textbf{Step 5.} Compute private exponent $d = e^{-1} \bmod \phi(n)$ using the Extended Euclidean Algorithm:
 $$ e \times d \equiv 1 \pmod{\phi(n)} $$
-To efficiently solve for $d$, the implementation employs the Extended Euclidean Algorithm (\texttt{extended\_gcd(a, b)}). This algorithm expresses the greatest common divisor as a linear combination, allowing the \texttt{modinv(a, m)} function to extract the coefficient that satisfies the inverse property.
 
-\subsection{Modular Exponentiation}
-Once the $(e, n)$ and $(d, n)$ key pairs are established, the system uses modular exponentiation to secure data integrity. Unlike textbook examples that sign messages character-by-character, this implementation accurately reflects real-world protocols by operating on the entire hashed message.
+\subsection{Signing and Verification}
+Let $H$ be the integer representation of the hash of the message, reduced modulo $n$.
 
-Let $H$ be the integer representation of the cryptographic hash (e.g., SHA-256) of the original message, restricted such that $H < n$ (handled in code by \texttt{h\_int \% n}).
+\textbf{Signing} (private key): The signer computes the signature $S$:
+$$ S \equiv H^d \pmod{n} $$
 
-\textbf{Signature Generation (Signing with Private Key):}\\
-The signer applies their private key exponent $d$ to the hash integer $H$ to produce the digital signature $S$:
-$$ S \equiv H^d \pmod n $$
-This is executed efficiently in Python using \texttt{pow(h, d, n)}. Because $d$ is mathematically linked to the factorization of $n$ (which only the owner knows), no one else can generate a valid $S$ for a given $H$.
+\textbf{Verification} (public key): The verifier recovers the hash:
+$$ H' \equiv S^e \pmod{n} $$
 
-\textbf{Signature Verification (Extracting with Public Key):}\\
-The verifier receives the signature $S$ and applies the signer's public key exponent $e$:
-$$ H^\prime \equiv S^e \pmod n $$
-According to Euler's Totient Theorem, because $e \times d \equiv 1 \pmod{\phi(n)}$, the mathematical operation perfectly reverses itself:
-$$ S^e \equiv (H^d)^e \equiv H^{ed} \equiv H^{k \cdot \phi(n) + 1} \equiv H \cdot (H^{\phi(n)})^k \equiv H \cdot 1^k \equiv H \pmod n $$
-If the recovered integer $H^\prime$ exactly matches the locally computed hash of the received message, the verification is successful. This rigorously proves both the origin (Authentication) and the intactness (Data Integrity) of the document.
+By Euler's theorem, since $e \cdot d \equiv 1 \pmod{\phi(n)}$:
+$$ S^e \equiv (H^d)^e \equiv H^{ed} \equiv H \pmod{n} $$
+If $H' = H$, the signature is valid—proving both authenticity and data integrity.

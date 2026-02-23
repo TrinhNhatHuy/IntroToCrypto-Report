@@ -1,0 +1,29 @@
+\section{Security Analysis}
+
+\subsection{Why RSA Digital Signatures Are Secure}
+
+The security of RSA rests on the \textbf{Integer Factorization Problem}: given a large composite number $n = p \times q$, it is computationally infeasible to recover $p$ and $q$. Without knowing $p$ and $q$, an attacker cannot compute $\phi(n)$, and therefore cannot derive the private exponent $d$ from the public exponent $e$.
+
+For our demonstration with small primes (e.g., $p = 104729$, $q = 224737$), the key size is approximately 34 bits—trivially factorable. In practice, RSA keys of 2048 bits or larger are used, where factorization would require billions of years with current technology.
+
+\subsection{Hash Algorithm Comparison}
+
+The choice of hash function directly impacts the security of the signature scheme:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|l|}
+        \hline
+        \textbf{Algorithm} & \textbf{Output (bits)} & \textbf{Status} & \textbf{Note}                          \\
+        \hline
+        MD5                & 128                    & Broken          & Collision attacks demonstrated (2004)  \\
+        SHA-1              & 160                    & Weak            & First practical collision found (2017) \\
+        SHA-256            & 256                    & Secure          & Industry standard, recommended         \\
+        SHA-512            & 512                    & Secure          & Strongest output, higher margin        \\
+        \hline
+    \end{tabular}
+    \caption{Security status of hash algorithms used in the implementation.}
+    \label{tab:hash_security}
+\end{table}
+
+
